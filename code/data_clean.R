@@ -4,10 +4,8 @@ rm(list = ls())
 
 #### load in packages ####
 library(tidyverse)
-library(rnaturalearth)
 library(sf)
 library(maps)
-library(rworldmap)
 
 
 #### read in raw data ####
@@ -52,8 +50,9 @@ data_location <- data %>%
   mutate(country = case_when(country == "Papua New Guinea "~"Papua New Guinea",
                              country == "Indonesia "~"Indonesia",
                              country == "Madagascar "~"Madagascar",
-                             country == "Chile"~"Chile(Easter Islands)",
-                             country == "United States"~"United States(Hawaii)",
+                             country == "Chile"~"Chile(Easter Island)",
+                             country == "United States"~"U.S.(Hawaii)",
+                             country == "French Polynesia "~"French Polynesia",
                              .default = as.character(country))) %>%
   mutate(closure_names = case_when(closure_names == "Periodically Harvested Closure"~"Periodic Closure",
                                    closure_names == "Sasi (Periodically Harvested Closure)"~"Periodic Closure",
@@ -63,9 +62,23 @@ data_location <- data %>%
                                    closure_names == "Temporary Fisheries Closure"~"Temporary Closure(Others)",
                                    .default = as.character(closure_names))) %>%
   mutate(closure_numbers = ifelse(is.na(closure_numbers), 1, closure_numbers)) %>%
+  mutate(continent = factor(continent, levels = c("Oceania", "Africa", "Asia", "North America", "South America"))) %>%
   left_join(country_location, by = "country")
 
-plain <- theme(
+data_location_unique <- data_location %>%
+  mutate(closure_type_country = paste(country, closure_names, sep = "-")) %>%
+  filter(!duplicated(closure_type_country))
+
+
+world <- map_data("world") %>%
+  filter(region != "Antarctica")
+
+
+# Color scheme
+type_color <- c("Rotational Closure" = "#bf2525", "Periodic Closure" = "#ed7d31", "Rāhui" = "#ffc000", "Temporary Closure(Others)" = "#69b647", "Seasonal Closure" = "#3d85c6")
+
+
+world_theme <- theme(
   axis.text = element_blank(),
   axis.line = element_blank(),
   axis.ticks = element_blank(),
@@ -73,13 +86,57 @@ plain <- theme(
   panel.grid = element_blank(),
   axis.title = element_blank(),
   panel.background = element_rect(fill = "white"),
-  plot.title = element_text(hjust = 0.5)
+  plot.title = element_text(hjust = 0.5),
+  legend.key = element_rect(fill = NA, color=NA),
+  legend.background = element_rect(fill=alpha('blue', 0)),
+  legend.title = element_text(size = 5),
+  legend.text = element_text(size = 5)
 )
 
-world <- map_data("world") %>%
-  filter(region)
+worldplot <- ggplot() +
+  geom_polygon(data = world, aes(x = long, y = lat, group = group), fill = "gray") +
+  geom_point(data = data_location_unique, aes(x = country_long, y = country_lat), color = "#3d85c6") +
+  geom_text(data = data_location_unique, mapping = aes(x = country_long, y = country_lat, label = country, hjust = hjust, vjust = vjust), size = 2) +
+  labs(tag = "A") +
+  coord_fixed(1.3) +
+  world_theme + theme(legend.position = "none")
 
 
+
+worldplot
+
+bar_theme <- theme(axis.text=element_text(size=7),
+                    axis.text.y = element_text(angle = 90, hjust = 0.5),
+                    axis.title=element_text(size=8),
+                    legend.text=element_text(size=6),
+                    legend.title=element_text(size=7),
+                    strip.text = element_text(size=8),
+                    plot.tag =element_text(size=9),
+                    plot.title=element_blank(),
+                    # Gridlines
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    panel.background = element_blank(),
+                    axis.line = element_line(colour = "black"),
+                    # Legend
+                    legend.key = element_rect(fill = NA, color=NA),
+                    legend.background = element_rect(fill=alpha('blue', 0)))
+
+bar <- ggplot(data = data_location, aes(x = continent, y = closure_numbers, fill = closure_names)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(name = "Closure Types", values = type_color) +
+  labs(x = "Continent", y = "Closure Cases", tag = "B") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  theme_bw() + bar_theme +
+  theme(axis.title.x=element_blank(),
+        legend.position = c(0.85, 0.8),
+        legend.key.size = unit(0.18, "cm"))
+
+bar
+
+
+g <- gridExtra::grid.arrange(worldplot, bar, nrow = 2)
+g
 
   
 

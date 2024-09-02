@@ -1,12 +1,12 @@
-﻿country,country_lat,country_long
-Papua New Guinea,-6.32,143.96
-Indonesia,-0.79,113.92
-Vanuatu,-16.255,167.72
-Fiji,-17.71,178.07
-Solomon Islands,-9.65,160.16
-French Polynesia,-17.54,-149.83
-United States(Hawaii),19.74,-155.84
-Chile(Easter Island),-27.11,-109.43
-Cook Islands,-21.23,-159.77
-Mexico,19.43,-99.13
-Madagascar,-18.77,46.87
+﻿country,country_lat,country_long,hjust,vjust
+Papua New Guinea,-6.32,143.96,0.1,-1
+Indonesia,-0.79,113.92,-0.2,-1
+Vanuatu,-16.255,167.72,1,1.5
+Fiji,-17.71,178.07,1,2
+Solomon Islands,-9.65,160.16,1,1.5
+French Polynesia,-17.54,-149.83,-0.1,0.5
+U.S.(Hawaii),19.74,-155.84,-0.1,1
+Chile(Easter Island),-27.11,-109.43,-0.1,1
+Cook Islands,-21.23,-159.77,1,2
+Mexico,19.43,-99.13,-0.2,1
+Madagascar,-18.77,46.87,-0.1,1
