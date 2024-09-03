@@ -13,6 +13,9 @@ data_orig <- read.csv("data/data_original.csv")
 
 country_location <- read.csv("data/country_location.csv")
 
+#### Directories
+plotdir <- "figure"
+
 ### clean data ####
 
 data <- data_orig %>%
@@ -138,8 +141,8 @@ bar
 g <- gridExtra::grid.arrange(worldplot, bar, nrow = 2)
 g
 
-  
+ggsave(g, filename = file.path(plotdir, "Fig1_Case_Distribution.png"),
+       width = 6.5, height = 6.5, units = "in", dpi = 600)
 
 
 
-  
