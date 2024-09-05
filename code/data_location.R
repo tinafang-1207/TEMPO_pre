@@ -20,7 +20,6 @@ plotdir <- "figure"
 
 data <- data_orig %>%
   janitor::clean_names() %>%
-  drop_na(x) %>%
   select(-x) %>%
   rename(full_author = full_author_list,
          closure_numbers = number_of_closures_studied_in_case_paper_if_paper_is_one_case,
@@ -56,21 +55,21 @@ data_location <- data %>%
                              country == "Chile"~"Chile(Easter Island)",
                              country == "United States"~"U.S.(Hawaii)",
                              country == "French Polynesia "~"French Polynesia",
+                             country == "United States (U.S.)"~"U.S.",
                              .default = as.character(country))) %>%
   mutate(closure_names = case_when(closure_names == "Periodically Harvested Closure"~"Periodic Closure",
-                                   closure_names == "Sasi (Periodically Harvested Closure)"~"Periodic Closure",
-                                   closure_names == "Rāhui (Spatial Temporary Closure)"~"Rāhui",
-                                   closure_names == "Tapu"~"Seasonal Closure",
                                    closure_names == "Locally Managed Marine Area (LMMA) / Temporary Closure"~"Temporary Closure(Others)",
                                    closure_names == "Temporary Fisheries Closure"~"Temporary Closure(Others)",
+                                   closure_names == "Temporary Closure"~"Temporary Closure(Others)",
+                                   closure_names == "Temporary Closure/Dynamic Area Management (DAM)"~"Dynamic Closure",
                                    .default = as.character(closure_names))) %>%
-  mutate(closure_numbers = ifelse(is.na(closure_numbers), 1, closure_numbers)) %>%
+  mutate(closure_numbers = ifelse(closure_numbers == "N/A", 1, closure_numbers)) %>%
+  mutate(closure_numbers = as.numeric(closure_numbers)) %>%
   mutate(continent = factor(continent, levels = c("Oceania", "Africa", "Asia", "North America", "South America"))) %>%
   left_join(country_location, by = "country")
 
 data_location_unique <- data_location %>%
-  mutate(closure_type_country = paste(country, closure_names, sep = "-")) %>%
-  filter(!duplicated(closure_type_country))
+  distinct(country, .keep_all = TRUE)
 
 
 world <- map_data("world") %>%
@@ -78,7 +77,7 @@ world <- map_data("world") %>%
 
 
 # Color scheme
-type_color <- c("Rotational Closure" = "#bf2525", "Periodic Closure" = "#ed7d31", "Rāhui" = "#ffc000", "Temporary Closure(Others)" = "#69b647", "Seasonal Closure" = "#3d85c6")
+type_color <- c("Rotational Closure" = "#bf2525", "Periodic Closure" = "#ed7d31", "Traditional Closure" = "#ffc000", "Temporary Closure(Others)" = "#69b647", "Dynamic Closure" = "#3d85c6")
 
 
 world_theme <- theme(
@@ -100,7 +99,6 @@ worldplot <- ggplot() +
   geom_polygon(data = world, aes(x = long, y = lat, group = group), fill = "gray") +
   geom_point(data = data_location_unique, aes(x = country_long, y = country_lat), color = "#3d85c6") +
   geom_text(data = data_location_unique, mapping = aes(x = country_long, y = country_lat, label = country, hjust = hjust, vjust = vjust), size = 2) +
-  labs(tag = "A") +
   coord_fixed(1.3) +
   world_theme + theme(legend.position = "none")
 
@@ -128,7 +126,7 @@ bar_theme <- theme(axis.text=element_text(size=7),
 bar <- ggplot(data = data_location, aes(x = continent, y = closure_numbers, fill = closure_names)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(name = "Closure Types", values = type_color) +
-  labs(x = "Continent", y = "Closure Cases", tag = "B") +
+  labs(x = "Continent", y = "Closure Cases") +
   guides(fill = guide_legend(reverse=TRUE)) +
   theme_bw() + bar_theme +
   theme(axis.title.x=element_blank(),

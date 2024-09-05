@@ -67,6 +67,7 @@ data_governance <- data %>%
                                             actors_type_design == "Villagers, NGOs, government"~"Locals & NGO & Government",
                                             actors_type_design == "Villagers"~"Locals",
                                             actors_type_design == "Local committee"~"Locals",
+                                            actors_type_design == "Community leaders, villagers, government"~"Community leaders&Locals&Government",
                                             .default = actors_type_design)) %>%
   separate(col = actors_type_design_new, sep = "&", into = c("actor_type_1", "actor_type_2", "actor_type_3", "actor_type_4", "actor_type_5")) %>%
   mutate(actor_type_1 = case_when(actor_type_1 == "Community leaders "~"Community leaders",
@@ -112,7 +113,7 @@ g_governance_overall <- ggplot(data_governance_type_overall, aes(ymax = ymax, ym
   geom_text(x = 4.5, aes(y = labelposition, label = label), color = "black", size = 3) +
   scale_fill_manual(name = "Governance Type", values = type_color) +
   coord_polar(theta = "y") +
-  labs(title = "Governance Type (Overall)", tag = "A") +
+  labs(title = "Governance Type (Overall)") +
   xlim(c(1,4)) +
   theme_void() +
   theme(plot.title.position = "plot",
@@ -143,7 +144,7 @@ g_governance_design <- ggplot(data_governance_type_design, aes(ymax = ymax, ymin
   geom_text(x = 4.5, aes(y = labelposition, label = label), color = "black", size = 3) +
   scale_fill_manual(name = "Governance Type", values = type_color) +
   coord_polar(theta = "y") +
-  labs(title = "Governance Type (Design)", tag = "B") +
+  labs(title = "Governance Type (Design)") +
   xlim(c(1,4)) +
   theme_void() +
   theme(plot.title.position = "plot",
@@ -212,7 +213,7 @@ g_actor_design <- ggplot(data_actors_overall, aes(ymax = ymax, ymin = ymin, xmax
   geom_text(x = 4.4, aes(y = labelposition, label = label), color = "black", size = 3) +
   scale_fill_manual(name = "Actor Type", values = actor_color) +
   coord_polar(theta = "y") +
-  labs(title = "Actor Type (Design)", tag = "C") +
+  labs(title = "Actor Type (Design)") +
   xlim(c(1,4)) +
   theme_void() +
   theme(plot.title.position = "plot",
